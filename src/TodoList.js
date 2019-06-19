@@ -1,7 +1,8 @@
 import React,{Component} from "react";
-import { Input, List, Button } from "antd";
 import store from './store'
-import {getChangeInputAction, getCommitInputAction}from './store/actionCreator'
+import {getChangeInputAction, getCommitInputAction, getDeleteListItemAction, getInitList}from './store/actionCreator'
+import TodoListUi from './TodoListUi'
+
 
 class TodoList extends Component {
   constructor(props){
@@ -9,27 +10,22 @@ class TodoList extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleCommit = this.handleCommit.bind(this);
     this.handleStoreChange = this.handleStoreChange.bind(this);
-    this.state = store.getState();
-    store.subscribe(this.handleStoreChange)
+    this.handleDelete = this.handleDelete.bind(this);
+    this.state = store.getState();//获取store里面的内容
+    store.subscribe(this.handleStoreChange)//订阅store的改变
     console.log(store.getState());
     
   }
   render(){
     return (
-      <div className="App">
-        <div>
-          <Input value={this.state.inputValue} onChange={this.handleInputChange} style={{width:'300px',margin:'10px 0'}} />
-          <Button onClick={this.handleCommit} style={{marginLeft:'10px'}} type="primary">Primary</Button>
-        </div>
-        <List
-          style={{width:'300px'}}
-          bordered
-          dataSource={this.state.list}
-          renderItem={item => <List.Item>{item}</List.Item>}
-        />
-      </div>
+      <TodoListUi inputValue={this.state.inputValue} handleInputChange={this.handleInputChange} handleCommit={this.handleCommit} list={this.state.list} handleDelete={this.handleDelete} />
     );
   }
+  componentDidMount (){
+      const action = getInitList();
+      store.dispatch(action);
+  }
+
   handleStoreChange(){
     this.setState(store.getState());
   }
@@ -39,6 +35,10 @@ class TodoList extends Component {
   }
   handleCommit(){
     const action = getCommitInputAction();
+    store.dispatch(action);
+  }
+  handleDelete(index){
+    const action = getDeleteListItemAction(index);
     store.dispatch(action);
   }
 }
